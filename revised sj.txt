@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct Student {
+    char name[20];
+    int kor;
+    int eng;
+};
+
+int main() {
+    struct Student students[3];
+    FILE* file = fopen("sj.txt", "r");
+
+    if (file == NULL) {
+        printf("Error opening file.");
+        return 1;
+    }
+
+    char buffer[1024];
+
+    // Skip the header line
+    fgets(buffer, sizeof(buffer), file);
+
+    for (int i = 0; i < 3; i++) {
+        fgets(buffer, sizeof(buffer), file);
+        sscanf(buffer, "%[^,],%d,%d", students[i].name, &students[i].kor, &students[i].eng);
+    }
+
+    fclose(file);
+
+    // Calculate and print the average for each student
+    FILE* avg_file = fopen("average.txt", "w");
+
+    if (avg_file == NULL) {
+        printf("Error opening file.");
+        return 1;
+    }
+
+    int totalKor = 0, totalEng = 0;
+
+    for (int i = 0; i < 3; i++) {
+        float average = (students[i].kor + students[i].eng) / 2.0f;
+        fprintf(avg_file, "%s's Average: %.2f\n", students[i].name, average);
+
+        // Accumulate subject scores
+        totalKor += students[i].kor;
+        totalEng += students[i].eng;
+    }
+
+    // Calculate and print the average for each subject
+    float avgKor = totalKor / 3.0f;
+    float avgEn = totalEng / 3.0f;
+
+    fprintf(avg_file, "Average Korean Score : %.2f\n", avgKor);
+    fprintf(avg_file, "Average English Score: %.2f\n", avgEn);
+
+    fclose(avg_file);
+
+    printf("Averages saved to average.txt\n");
+
+    return 0;
+}
